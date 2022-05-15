@@ -6,7 +6,8 @@ import {
     BeforeBlockApplyContext, TransactionApplyContext
 } from 'lisk-sdk';
 import { RegisterAsset } from "./assets/register_asset";
-import { lsnAccountPropsSchema, LNSAccountProps } from './data/account_props';
+import { ReverseLookupAsset } from "./assets/reverse_lookup_asset";
+import { lsnAccountPropsSchema } from './data/account_props';
 
 export class LnsModule extends BaseModule {
     public actions = {
@@ -29,7 +30,7 @@ export class LnsModule extends BaseModule {
 		// },
     };
     public name = 'lns';
-    public transactionAssets = [new RegisterAsset()];
+    public transactionAssets = [new RegisterAsset(), new ReverseLookupAsset()];
     public events = [
         // Example below
         // 'lns:newBlock',
