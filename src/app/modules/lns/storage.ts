@@ -40,3 +40,23 @@ export const createLNSObject = async (
 
 	await stateStore.chain.set(getKeyForNode(node), codec.encode(lnsNodeSchema, input));
 };
+
+export const updateLNSObject = async (
+	stateStore: StateStore,
+	params: Partial<Omit<LNSNode, 'createdAt' | 'updatedAt'>> & { node: Buffer },
+): Promise<void> => {
+	const lnsObject = await getLNSObject(stateStore, params.node);
+
+	if (!lnsObject) {
+		throw new Error('No lns object is associated with this name');
+	}
+
+	lnsObject.ttl = params.ttl ?? lnsObject.ttl;
+	lnsObject.ownerAddress = params.ownerAddress ?? lnsObject.ownerAddress;
+	lnsObject.expiry = params.expiry ?? lnsObject.expiry;
+	lnsObject.records = params.records ?? lnsObject.records;
+
+	lnsObject.updatedAt = Math.ceil(Date.now() / 1000);
+
+	await stateStore.chain.set(getKeyForNode(params.node), codec.encode(lnsNodeSchema, lnsObject));
+};
