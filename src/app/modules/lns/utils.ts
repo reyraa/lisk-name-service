@@ -3,3 +3,7 @@ export const addYears = (now: Date, yearsToAdd: number) => {
   date.setFullYear(date.getFullYear() + yearsToAdd); 
   return date;
 };
+
+export const isTTLPassed = () => {
+  
+}

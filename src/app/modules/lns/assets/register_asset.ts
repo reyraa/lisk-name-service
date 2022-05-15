@@ -3,7 +3,7 @@ import { RegisterAssetProps, registerAssetPropsSchema } from '../data/asset/regi
 import { createLNSObject, getLNSObject, getNodeForName } from '../storage';
 import { LNSAccountProps } from '../data/account_props';
 import { MIN_TTL_VALUE, VALID_TLDS } from '../constants';
-import { addYears } from './utils';
+import { addYears } from '../utils';
 
 export class RegisterAsset extends BaseAsset<RegisterAssetProps> {
 	public name = 'register';
