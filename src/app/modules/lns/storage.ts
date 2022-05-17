@@ -1,7 +1,9 @@
 import { hash } from 'eth-ens-namehash';
 import { chain, codec, StateStore } from 'lisk-sdk';
-import { LNS_PREFIX } from './constants';
+import { LNS_PREFIX, EMPTY_BUFFER } from './constants';
 import { LNSNode, lnsNodeSchema } from './data/ls_nodes';
+import { LNSAccountProps } from './data/account_props';
+import { isExpired } from './utils';
 
 // Get a unique key for each LNS object
 export const getKeyForNode = (node: Buffer): string => `${LNS_PREFIX}:${node.toString('hex')}`;
@@ -59,4 +61,62 @@ export const updateLNSObject = async (
 	lnsObject.updatedAt = Math.ceil(Date.now() / 1000);
 
 	await stateStore.chain.set(getKeyForNode(params.node), codec.encode(lnsNodeSchema, lnsObject));
+};
+
+export const lookupAddress = async ({
+	accountGetter,
+	chainGetter,
+	address,
+}: {
+	accountGetter: (address: Buffer) => Promise<chain.Account<LNSAccountProps>>;
+	chainGetter: (address: string) => Promise<Buffer | undefined>;
+	address: Buffer;
+}): Promise<LNSNode> => {
+	let account: chain.Account<LNSAccountProps>;
+
+	try {
+		account = await accountGetter(address);
+	} catch {
+		throw new Error(`Lookup account "${address.toString('hex')}" not found.`);
+	}
+
+	if (account.lns.reverseLookup === EMPTY_BUFFER) {
+		throw new Error(`Account "${address.toString('hex')}" is not associated with any LNS object.`);
+	}
+
+	const result = await chainGetter(getKeyForNode(account.lns.reverseLookup));
+
+	if (!result) {
+		throw new Error(`Problem looking up node "${account.lns.reverseLookup.toString('hex')}"`);
+	}
+
+	const lnsNode = codec.decode<LNSNode>(lnsNodeSchema, result);
+
+	if (isExpired(lnsNode)) {
+		throw new Error(`Account "${address.toString('hex')}" is associated to an expired LNS object.`);
+	}
+
+	return lnsNode;
+};
+
+export const resolveNode = async ({
+	chainGetter,
+	node,
+}: {
+	chainGetter: (address: string) => Promise<Buffer | undefined>;
+	node: Buffer;
+}): Promise<LNSNode> => {
+	const result = await chainGetter(getKeyForNode(node));
+
+	if (!result) {
+		throw new Error(`Node "${node.toString('hex')}" could not resolve.`);
+	}
+
+	const lnsNode = codec.decode<LNSNode>(lnsNodeSchema, result);
+
+	if (isExpired(lnsNode)) {
+		throw new Error(`Node "${node.toString('hex')}" is associated to an expired LNS object.`);
+	}
+
+	return lnsNode;
 };

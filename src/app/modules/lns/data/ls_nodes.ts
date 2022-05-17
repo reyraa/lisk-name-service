@@ -1,4 +1,4 @@
-import { LNSNodeRecord, lnsNodeRecordSchema } from './lns_node_records';
+import { LNSNodeRecord, lnsNodeRecordSchema, LNSNodeRecordJSON } from './lns_node_records';
 
 export interface LNSNode {
 	ownerAddress: Buffer; 
@@ -6,6 +6,16 @@ export interface LNSNode {
 	ttl: number;
 	expiry: number;
 	records: LNSNodeRecord[];
+	createdAt: number;
+	updatedAt: number;
+}
+
+export interface LNSNodeJSON {
+	ownerAddress: string;
+	name: string;
+	ttl: number;
+	expiry: number;
+	records: LNSNodeRecordJSON[];
 	createdAt: number;
 	updatedAt: number;
 }
