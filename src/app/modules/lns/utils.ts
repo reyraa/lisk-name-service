@@ -10,3 +10,8 @@ export const isTTLPassed = (lnsObject: LNSNode) => {
   const now = new Date();
   return (lnsObject.updatedAt + lnsObject.ttl) > Math.ceil(now.getTime() / 1000);
 }
+
+export const isExpired = (lnsObject: LNSNode) => {
+  const now = new Date();
+  return (lnsObject.updatedAt + lnsObject.expiry) > Math.ceil(now.getTime() / 1000);
+};
